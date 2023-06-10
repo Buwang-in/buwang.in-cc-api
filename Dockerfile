@@ -7,7 +7,7 @@ RUN apk add --no-cache nginx wget \
         $PHPIZE_DEPS \
         curl \
         libpng-dev \
-        libonig-dev \
+        libonig \
         libxml2-dev \
         zip \
         unzip \
