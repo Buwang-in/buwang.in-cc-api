@@ -17,6 +17,10 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Install Cloud SQL Proxy
+RUN curl -o /usr/local/bin/cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
+    chmod +x /usr/local/bin/cloud_sql_proxy
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -38,8 +42,10 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Copy .env.docker as .env
 COPY .env.docker .env
 
-# Expose port 9000 for PHP-FPM
+# Expose port 8080 for Cloud Run
 EXPOSE 8080
 
 # Run Cloud SQL Proxy and database migrations
-CMD /usr/local/bin/cloud_sql_proxy -instances=buwangin:asia-southeast2:buwangin-cc-db=tcp:3306 & php artisan migrate:fresh --seed && php-fpm
+CMD /usr/local/bin/cloud_sql_proxy -instances=buwangin:asia-southeast2:buwangin-cc-db=tcp:3306 & \
+    php artisan migrate --force && \
+    php -S 0.0.0.0:8080 -t public
