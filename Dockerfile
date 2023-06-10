@@ -36,6 +36,7 @@ RUN composer dump-autoload --optimize
 # Set permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+# Copy .env.docker as .env
 COPY .env.docker .env
 
 # Expose port 9000 for PHP-FPM
