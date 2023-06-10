@@ -39,7 +39,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 COPY .env.docker .env
 
 # Expose port 9000 for PHP-FPM
-EXPOSE 9000
+EXPOSE 8080
 
 # Run Cloud SQL Proxy and database migrations
 CMD /usr/local/bin/cloud_sql_proxy -instances=buwangin:asia-southeast2:buwangin-cc-db=tcp:3306 & php artisan migrate:fresh --seed && php-fpm
