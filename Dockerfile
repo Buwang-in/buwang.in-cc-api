@@ -45,7 +45,8 @@ COPY .env.docker .env
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Run Cloud SQL Proxy and database migrations
+# Run database migrations
 CMD /usr/local/bin/cloud_sql_proxy -instances=buwangin:asia-southeast2:buwangin-cc-db=tcp:3306 & \
+    sleep 5 && \
     php artisan migrate --force && \
     php -S 0.0.0.0:8080 -t public
