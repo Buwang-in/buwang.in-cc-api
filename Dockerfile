@@ -2,16 +2,26 @@
 FROM php:8.1-fpm-alpine
 
 # Install system dependencies
-RUN apk add --no-cache nginx wget
+RUN apk add --no-cache nginx wget \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        curl \
+        libpng-dev \
+        libonig-dev \
+        libxml2-dev \
+        zip \
+        unzip \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
+    && apk del -f .build-deps
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Set working directory
 WORKDIR /app
 
 # Copy nginx.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql
 
 # Copy Laravel project files
 COPY src/ /app
