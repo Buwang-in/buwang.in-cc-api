@@ -39,7 +39,7 @@ RUN composer dump-autoload --optimize
 RUN chown -R www-data: /app
 
 # Expose port 80 for Nginx
-EXPOSE 80
+EXPOSE 9000
 
 # Run Nginx and PHP-FPM
 CMD envsubst '$$DB_HOST' < /etc/nginx/nginx.conf > /etc/nginx/nginx.conf && \
