@@ -9,4 +9,4 @@ php-fpm -D
 
 nginx
 
-php artisan migrate:fresh --seed
+# php artisan migrate:fresh --seed
