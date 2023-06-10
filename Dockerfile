@@ -7,8 +7,8 @@ RUN apk add --no-cache nginx wget \
         $PHPIZE_DEPS \
         curl \
         libpng-dev \
-        libonig \
         libxml2-dev \
+        oniguruma-dev \
         zip \
         unzip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
