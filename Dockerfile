@@ -1,5 +1,5 @@
 # Base image
-FROM php:8.1-fpm-alpine3.13
+FROM php:8.1-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache nginx wget \
