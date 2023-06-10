@@ -22,4 +22,6 @@ RUN cd /app && \
 
 RUN chown -R www-data: /app
 
+EXPOSE 3306
+
 CMD sh /app/docker/startup.sh
