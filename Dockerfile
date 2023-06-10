@@ -1,52 +1,42 @@
 # Base image
-FROM php:8.1-fpm
+FROM php:8.1-fpm-alpine
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache nginx wget
+
+RUN mkdir -p /run/nginx
+
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN docker-php-ext-install pdo_mysql
 
 # Install Cloud SQL Proxy
-RUN curl -o /usr/local/bin/cloud_sql_proxy https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && \
-    chmod +x /usr/local/bin/cloud_sql_proxy
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /usr/local/bin/cloud_sql_proxy
+RUN chmod +x /usr/local/bin/cloud_sql_proxy
+
+# Install Composer
+RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /app
 
 # Copy application files
-COPY . /var/www/html
-
-# Copy composer files
-COPY composer.json composer.lock ./
+COPY src /app
+COPY ./src /app
 
 # Install project dependencies
-RUN composer install --no-scripts --no-autoloader
+RUN composer install --no-dev --no-scripts --no-autoloader
 
-# Generate autoload files
-RUN composer dump-autoload --optimize
+# Copy .env.docker as .env in the src folder
+COPY .env.docker /app/src/.env
 
-# Set permissions
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Copy startup.sh
+COPY docker/startup.sh /app/startup.sh
+RUN chmod +x /app/startup.sh
 
-# Copy .env.docker as .env
-COPY .env.docker .env
+# Copy nginx.conf
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 8080 for Cloud Run
-EXPOSE 8080
-
-# Run database migrations
-CMD /usr/local/bin/cloud_sql_proxy -instances=buwangin:asia-southeast2:buwangin-cc-db=tcp:3306 & \
-    sleep 5 && \
-    php artisan migrate --force && \
-    php -S 0.0.0.0:8080 -t public
+# Run database migrations and start services
+CMD /app/startup.sh
