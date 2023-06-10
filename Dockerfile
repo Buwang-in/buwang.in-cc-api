@@ -4,39 +4,34 @@ FROM php:8.1-fpm-alpine
 # Install system dependencies
 RUN apk add --no-cache nginx wget
 
-RUN mkdir -p /run/nginx
+# Set working directory
+WORKDIR /app
 
+# Copy nginx.conf
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql
 
-# Install Cloud SQL Proxy
-RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O /usr/local/bin/cloud_sql_proxy
-RUN chmod +x /usr/local/bin/cloud_sql_proxy
+# Copy Laravel project files
+COPY src/ /app
 
-# Install Composer
-RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
-
-# Set working directory
-WORKDIR /app
-
-# Copy application files
-COPY src /app
-COPY ./src /app
+# Copy .env.docker as .env
+COPY .env.docker /app/.env
 
 # Install project dependencies
-RUN composer install --no-dev --no-scripts --no-autoloader
+RUN composer install --no-scripts --no-autoloader
 
-# Copy .env.docker as .env in the src folder
-COPY .env.docker /app/src/.env
+# Generate autoload files
+RUN composer dump-autoload --optimize
 
-# Copy startup.sh
-COPY docker/startup.sh /app/startup.sh
-RUN chmod +x /app/startup.sh
+# Set permissions
+RUN chown -R www-data: /app
 
-# Copy nginx.conf
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+# Expose port 80 for Nginx
+EXPOSE 80
 
-# Run database migrations and start services
-CMD /app/startup.sh
+# Run Nginx and PHP-FPM
+CMD envsubst '$$DB_HOST' < /etc/nginx/nginx.conf > /etc/nginx/nginx.conf && \
+    service nginx start && \
+    php-fpm
