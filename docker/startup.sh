@@ -1,7 +1,6 @@
 #!/bin/sh
-# cd /app/src/app
-# php artisan migrate:fresh --seed
-# cd . /app
+cd /app/src/app
+php artisan migrate:fresh --seed
 sed -i "s,LISTEN_PORT,$PORT,g" /etc/nginx/nginx.conf
 
 php-fpm -D
