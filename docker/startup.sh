@@ -7,6 +7,6 @@ mv /app/.env.docker /app/.env
 
 php-fpm -D
 
-php artisan migrate:fresh --seed
-
 nginx
+
+php artisan migrate:fresh --seed
