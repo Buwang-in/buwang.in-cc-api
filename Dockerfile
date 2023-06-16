@@ -18,7 +18,7 @@ RUN mv /app/.env.docker /app/.env
 
 RUN sh -c "wget http://getcomposer.org/composer.phar && chmod a+x composer.phar && mv composer.phar /usr/local/bin/composer"
 RUN cd /app && \
-    /usr/local/bin/composer install
+    /usr/local/bin/composer install && /usr/local/bin/php artisan cache:clear && /usr/local/bin/php artisan view:clear
 
 RUN chown -R www-data: /app
 
