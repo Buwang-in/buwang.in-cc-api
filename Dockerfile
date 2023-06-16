@@ -24,6 +24,4 @@ RUN chown -R www-data: /app
 
 EXPOSE 3306
 
-CMD php artisan migrate:fresh --seed
-
-CMD sh /app/docker/startup.sh
+CMD php artisan cache:clear && php artisan view:clear && php artisan migrate:fresh --seed && sh /app/docker/startup.sh
